@@ -19,14 +19,15 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { Request, Response } from 'express';
+import { application, Request, Response } from 'express';
 import { Activity, ActivityType, Client, DiscordAPIError } from 'discord.js';
-import { ApiHeader } from '@nestjs/swagger';
-import { UserBuilder } from './slash-commands/dto/user.entity';
-import { BioPayload } from './slash-commands/dto/bio-payload';
+import { ApiHeader, ApiResponse, getSchemaPath } from '@nestjs/swagger';
+import { UserBuilder } from './dto/user.entity';
+import { BioPayload } from './dto/bio-payload';
 import { json, text } from 'stream/consumers';
 import { Validate } from 'class-validator';
-import { HttpExceptionFilter } from './bad-request.filter';
+import { HttpExceptionFilter } from './filters/bad-request.filter';
+import { DiscordExceptionFilter } from './filters/discord-exception.filter';
 
 @Controller('discord')
 export class DiscordController {
@@ -36,6 +37,9 @@ export class DiscordController {
   @InjectRedis()
   private redis: Redis;
 
+  @ApiResponse({
+    status: 200,
+  })
   @ApiHeader({
     required: true,
     name: 'x-api-key',
@@ -57,60 +61,69 @@ export class DiscordController {
   }
 
   @Get('/user/:id')
-  public async getMe(@Param('id') id: string, @Res() response: Response) {
+  @Header('content-type', 'application/json')
+  @HttpCode(HttpStatus.OK)
+  @UseFilters(new HttpExceptionFilter(), DiscordExceptionFilter)
+  public async getUser(@Param('id') id: string) {
     const guild = this.client.guilds.cache.get(process.env.D_GUILD_ID);
 
-    try {
-      const member = await guild.members.fetch(id);
+    const member = await guild.members.fetch(id);
 
-      const { clientStatus } = member.presence;
-      const activities = member.presence.activities;
-      const spotify = member.presence.activities.find(
-        (it) => it.name === 'Spotify',
+    const { clientStatus } = member.presence;
+    const activities = member.presence.activities;
+    const spotify = member.presence.activities.find(
+      (it) => it.name === 'Spotify',
+    );
+    const activity = activities.find((it) => {
+      return (
+        it.type !== ActivityType.Custom && it.type !== ActivityType.Listening
       );
-      const activity = activities.find((it) => {
-        return (
-          it.type !== ActivityType.Custom && it.type !== ActivityType.Listening
-        );
-      });
+    });
 
-      const { party, equals, toString, flags, ...handledActivity } = activity;
+    const userBuilder = new UserBuilder()
+      .setBio((await this.redis.get(`user_bio:${id}`)) ?? null)
+      .setDiscrim(+member.user.discriminator)
+      .setActivity(
+        activity
+          ? {
+              applicationId: activity.applicationId,
+              assets: activity.assets,
+              buttons: activity.buttons,
+              createdTimestamp: activity.createdTimestamp,
+              details: activity.details,
+              name: activity.name,
+              emoji: activity.emoji,
+              state: activity.state,
+              timestamps: activity.timestamps,
+              type: activity.type,
+              url: activity.url,
+            }
+          : null,
+      )
+      .setSpotify(
+        spotify
+          ? {
+              cover: spotify.assets.largeImage
+                ? `https://i.scdn.co/image/${
+                    spotify.assets.largeImage.split(':')[1]
+                  }`
+                : null,
+              artist: spotify.state.replace(';', ','),
+              songName: spotify.details,
+              timestamps: spotify.timestamps,
+              albumName: spotify.assets.largeText,
+              type: spotify.type,
+            }
+          : null,
+      )
+      .setStatus(member.presence.status)
+      .setDesktopPlatform(!!clientStatus.desktop)
+      .setWebPlatform(!!clientStatus.web)
+      .setMobilePlatform(!!clientStatus.mobile)
+      .setUsername(member.user.username)
+      .setId(member.id)
+      .build();
 
-      const userBuilder = new UserBuilder()
-        .setBio((await this.redis.get(`user_bio:${id}`)) ?? null)
-        .setDiscrim(+member.user.discriminator)
-        .setActivity(handledActivity)
-        .setSpotify(
-          spotify
-            ? {
-                cover: spotify.assets.largeImage
-                  ? `https://i.scdn.co/image/${
-                      spotify.assets.largeImage.split(':')[1]
-                    }`
-                  : null,
-                artist: spotify.state.replace(';', ','),
-                songName: spotify.details,
-                timestamps: spotify.timestamps,
-                albumName: spotify.assets.largeText,
-                type: spotify.type,
-              }
-            : null,
-        )
-        .setStatus(member.presence.status)
-        .setDesktopPlatform(!!clientStatus.desktop)
-        .setWebPlatform(!!clientStatus.web)
-        .setMobilePlatform(!!clientStatus.mobile)
-        .setUsername(member.user.username)
-        .setId(member.id)
-        .build();
-
-      return response.status(HttpStatus.OK).json(userBuilder);
-    } catch (e) {
-      if (e instanceof DiscordAPIError) {
-        return response.status(HttpStatus.BAD_REQUEST).json({
-          message: e.message,
-        });
-      }
-    }
+    return userBuilder;
   }
 }
