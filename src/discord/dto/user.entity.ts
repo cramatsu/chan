@@ -4,14 +4,18 @@ import type {
   PresenceStatus,
 } from 'discord.js';
 
-export interface UserData extends UserPlatform {
+export interface UserData {
   id: string;
   username: string;
+  avatar: string;
   discrim: number;
   activity: ModifiedActivity;
   status: PresenceStatus;
   bio: string | null;
   spotify: Spotify | null;
+  web: boolean;
+  mobile: boolean;
+  desktop: boolean;
 }
 export interface Assets {
   largeText: string;
@@ -38,6 +42,7 @@ export class UserBuilder {
 
   public constructor() {
     this._user = {
+      avatar: '',
       bio: null,
       status: null,
       username: '',
@@ -51,6 +56,10 @@ export class UserBuilder {
     };
   }
 
+  public setAvatarUrl(url: string): this {
+    this._user.avatar = url;
+    return this;
+  }
   public setStatus(status: PresenceStatus): this {
     this._user.status = status;
     return this;

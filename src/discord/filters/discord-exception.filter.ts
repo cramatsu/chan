@@ -12,15 +12,15 @@ export class DiscordExceptionFilter implements ExceptionFilter {
 
     const messageRegexp = new RegExp('(?<=:.).*', 'gi');
 
-    const anoterMessage = messageRegexp.exec(exception.message);
-    console.log(anoterMessage);
-    if (anoterMessage !== null) {
+    const clarificationMessage = messageRegexp.exec(exception.message);
+
+    if (clarificationMessage !== null) {
       return response.status(response.statusCode).json({
-        message: anoterMessage[0],
+        message: clarificationMessage[0]?.toUpperCase(),
       });
     }
     return response.status(response.statusCode).json({
-      message: exception.message,
+      message: exception.message?.toUpperCase(),
     });
   }
 }

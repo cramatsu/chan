@@ -18,12 +18,10 @@ export class HttpExceptionFilter<T extends HttpException>
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
 
-    console.log(exception);
-
     if (exception instanceof BadRequestException) {
       const normalizedError = exception.getResponse() as { message: string[] };
       response.status(status).json({
-        message: normalizedError.message[0],
+        message: normalizedError.message[0].toUpperCase(),
       });
     }
   }
