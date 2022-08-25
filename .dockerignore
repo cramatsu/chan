@@ -3,3 +3,5 @@ dist
 Dockerfile
 .dockerignore
 *.log
+.github
+assets
