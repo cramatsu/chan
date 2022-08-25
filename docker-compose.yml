@@ -1,0 +1,29 @@
+version: '3'
+services:
+  redis:
+    container_name: 'CHAN_REDIS'
+    image: 'redis:7-alpine'
+    labels:
+      com.chan.description: 'Redis'
+    ports:
+      - '127.0.0.1:6379:6379'
+    volumes:
+      - ./redis-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'redis-cli ping']
+      interval: 10s
+      timeout: 5s
+
+  api:
+    build: .
+    ports:
+      - '4945:3333'
+    container_name: 'CHAN_API'
+    env_file:
+      - '.env'
+    environment:
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+    restart: unless-stopped

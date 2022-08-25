@@ -64,11 +64,9 @@ export class DiscordController {
   public async patchBio(@Body() body: BioPayload, @Req() req: Request) {
     const apiKey = req.header('x-api-key');
 
-    console.log(body);
     const userId = await this.redis.get(`api_key:${apiKey}`);
-    console.log(2);
+
     await this.redis.set(`user_bio:${userId}`, body.text);
-    console.log(3);
   }
 
   @ApiQuery({

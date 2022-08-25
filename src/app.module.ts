@@ -13,7 +13,7 @@ import { SlashCommandsModule } from './discord/slash-commands/slash-commands.mod
     RedisModule.forRoot({
       config: {
         port: 6379,
-        host: 'localhost',
+        host: process.env.REDIS_HOST ?? 'localhost',
       },
     }),
     DiscordModule.forRootAsync({
@@ -48,7 +48,6 @@ import { SlashCommandsModule } from './discord/slash-commands/slash-commands.mod
     }),
     DModule,
     AuthModule,
-    SlashCommandsModule,
   ],
   controllers: [],
   providers: [],

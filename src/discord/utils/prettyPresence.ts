@@ -23,15 +23,11 @@ export const prettyPresence = (data: {
     (it) => it.name === 'Spotify',
   );
 
-  console.log(spotify);
-
   const activity = activities.find((it) => {
     return (
       it.type !== ActivityType.Custom && it.type !== ActivityType.Listening
     );
   });
-
-  console.log(member);
 
   return new UserBuilder()
     .setBio(bio)
