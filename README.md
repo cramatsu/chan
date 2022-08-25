@@ -5,6 +5,7 @@
 ### Advantages
 
 - Fast deploy
+- Add bio to you API response
 - Minified response version
 - Not Elixir `ヽ(￣ω￣(。。 )ゝ`
 - The list will be constantly expanding, because I have a lot of ideas.
@@ -22,6 +23,12 @@ Api description (Swagger) is located at `{{protocol}}://{{baseUrl}}/api`
 
 > Examlple
 > `http://localhost:3333/api`
+
+
+# Security
+To get an access key for changing bio, write to the bot `/api`
+
+![Gigachad](assets/gigachad-lookin-for-api-key.gif)
 
 # TODO
 
