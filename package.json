@@ -1,10 +1,13 @@
 {
   "name": "chan",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
-  "author": "",
+  "author": {
+    "name": "cramatsu",
+    "email": "icramatsu@icloud.com"
+  },
   "private": true,
-  "license": "UNLICENSED",
+  "license": "WTFPL",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
