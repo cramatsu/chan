@@ -5,33 +5,22 @@ import {
   Controller,
   Get,
   Header,
-  Headers,
   HttpCode,
-  HttpException,
   HttpStatus,
   Param,
   Patch,
+  Query,
   Req,
-  Res,
-  UseGuards,
   UseFilters,
+  UseGuards,
   UsePipes,
   ValidationPipe,
-  Query,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { application, Request, Response } from 'express';
-import { Activity, ActivityType, Client, DiscordAPIError } from 'discord.js';
-import {
-  ApiHeader,
-  ApiQuery,
-  ApiResponse,
-  getSchemaPath,
-} from '@nestjs/swagger';
-import { UserBuilder } from './dto/user.entity';
+import { ApiHeader, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { Client } from 'discord.js';
+import { Request } from 'express';
 import { BioPayload } from './dto/bio-payload';
-import { json, text } from 'stream/consumers';
-import { Validate } from 'class-validator';
 import { HttpExceptionFilter } from './filters/bad-request.filter';
 import { DiscordExceptionFilter } from './filters/discord-exception.filter';
 import { minimalPresence, prettyPresence } from './utils/prettyPresence';

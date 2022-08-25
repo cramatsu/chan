@@ -3,9 +3,8 @@ import { RedisModule } from '@nestjs-modules/ioredis';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GatewayIntentBits } from 'discord.js';
-import { DiscordModule as DModule } from './discord/discord.module';
 import { AuthModule } from './auth/auth.module';
-import { SlashCommandsModule } from './discord/slash-commands/slash-commands.module';
+import { DiscordModule as DModule } from './discord/discord.module';
 
 @Module({
   imports: [

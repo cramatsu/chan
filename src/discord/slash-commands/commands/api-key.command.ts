@@ -5,7 +5,6 @@ import {
   bold,
   CommandInteraction,
   EmbedBuilder,
-  inlineCode,
   spoiler,
   time,
 } from 'discord.js';
